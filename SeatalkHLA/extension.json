@@ -1,0 +1,13 @@
+{
+  "name": "Seatalk HLA",
+  "apiVersion": "1.0.0",
+  "author": "Arne Gueldener",
+  "version": "0.0.1",
+  "description": "HightLevelAnalyzer for Seatalk-Datagrams",
+  "extensions": {
+    "Seatalk HLA": {
+      "type": "HighLevelAnalyzer",
+      "entryPoint": "HighLevelAnalyzer.Hla"
+    }
+  }
+}
