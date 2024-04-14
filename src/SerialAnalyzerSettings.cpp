@@ -11,7 +11,6 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
       mBitRate( 9600 ),
       mBitsPerTransfer( 8 ),
       mStopBits( 1.0 ),
-      mParity( AnalyzerEnums::None ),
       mShiftOrder( AnalyzerEnums::LsbFirst ),
       mInverted( false ),
       mUseAutobaud( false ),
@@ -60,15 +59,6 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
     mStopBitsInterface->AddNumber( 2.0, "2 Stop Bits", "" );
     mStopBitsInterface->SetNumber( mStopBits );
 
-
-    mParityInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-    mParityInterface->SetTitleAndTooltip( "Parity Bit", "Specify None, Even, or Odd Parity." );
-    mParityInterface->AddNumber( AnalyzerEnums::None, "No Parity Bit (Standard)", "" );
-    mParityInterface->AddNumber( AnalyzerEnums::Even, "Even Parity Bit", "" );
-    mParityInterface->AddNumber( AnalyzerEnums::Odd, "Odd Parity Bit", "" );
-    mParityInterface->SetNumber( mParity );
-
-
     mShiftOrderInterface.reset( new AnalyzerSettingInterfaceNumberList() );
     mShiftOrderInterface->SetTitleAndTooltip( "Significant Bit",
                                               "Select if the most significant bit or least significant bit is transmitted first" );
@@ -105,7 +95,6 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
     AddInterface( mBitRateInterface.get() );
     AddInterface( mBitsPerTransferInterface.get() );
     AddInterface( mStopBitsInterface.get() );
-    AddInterface( mParityInterface.get() );
     AddInterface( mShiftOrderInterface.get() );
     AddInterface( mInvertedInterface.get() );
     AddInterface( mSerialModeInterface.get() );
@@ -123,18 +112,10 @@ SerialAnalyzerSettings::~SerialAnalyzerSettings() = default;
 
 bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
 {
-    if( AnalyzerEnums::Parity( U32( mParityInterface->GetNumber() ) ) != AnalyzerEnums::None )
-        if( SerialAnalyzerEnums::Mode( U32( mSerialModeInterface->GetNumber() ) ) != SerialAnalyzerEnums::Normal )
-        {
-            SetErrorText( "Sorry, but we don't support using parity at the same time as MP mode." );
-            return false;
-        }
-
     mInputChannel = mInputChannelInterface->GetChannel();
     mBitRate = mBitRateInterface->GetInteger();
     mBitsPerTransfer = U32( mBitsPerTransferInterface->GetNumber() );
     mStopBits = mStopBitsInterface->GetNumber();
-    mParity = AnalyzerEnums::Parity( U32( mParityInterface->GetNumber() ) );
     mShiftOrder = AnalyzerEnums::ShiftOrder( U32( mShiftOrderInterface->GetNumber() ) );
     mInverted = bool( U32( mInvertedInterface->GetNumber() ) );
     mUseAutobaud = mUseAutobaudInterface->GetValue();
@@ -152,7 +133,6 @@ void SerialAnalyzerSettings::UpdateInterfacesFromSettings()
     mBitRateInterface->SetInteger( static_cast<int>( mBitRate ) );
     mBitsPerTransferInterface->SetNumber( mBitsPerTransfer );
     mStopBitsInterface->SetNumber( mStopBits );
-    mParityInterface->SetNumber( mParity );
     mShiftOrderInterface->SetNumber( mShiftOrder );
     mInvertedInterface->SetNumber( mInverted );
     mUseAutobaudInterface->SetValue( mUseAutobaud );
@@ -173,7 +153,6 @@ void SerialAnalyzerSettings::LoadSettings( const char* settings )
     text_archive >> mBitRate;
     text_archive >> mBitsPerTransfer;
     text_archive >> mStopBits;
-    text_archive >> *( U32* )&mParity;
     text_archive >> *( U32* )&mShiftOrder;
     text_archive >> mInverted;
 
@@ -202,7 +181,6 @@ const char* SerialAnalyzerSettings::SaveSettings()
     text_archive << mBitRate;
     text_archive << mBitsPerTransfer;
     text_archive << mStopBits;
-    text_archive << mParity;
     text_archive << mShiftOrder;
     text_archive << mInverted;
 

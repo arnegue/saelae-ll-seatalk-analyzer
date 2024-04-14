@@ -33,7 +33,6 @@ class SerialAnalyzerSettings : public AnalyzerSettings
     U32 mBitsPerTransfer;
     AnalyzerEnums::ShiftOrder mShiftOrder;
     double mStopBits;
-    AnalyzerEnums::Parity mParity;
     bool mInverted;
     bool mUseAutobaud;
     SerialAnalyzerEnums::Mode mSerialMode;
@@ -44,7 +43,6 @@ class SerialAnalyzerSettings : public AnalyzerSettings
     std::unique_ptr<AnalyzerSettingInterfaceNumberList> mBitsPerTransferInterface;
     std::unique_ptr<AnalyzerSettingInterfaceNumberList> mShiftOrderInterface;
     std::unique_ptr<AnalyzerSettingInterfaceNumberList> mStopBitsInterface;
-    std::unique_ptr<AnalyzerSettingInterfaceNumberList> mParityInterface;
     std::unique_ptr<AnalyzerSettingInterfaceNumberList> mInvertedInterface;
     std::unique_ptr<AnalyzerSettingInterfaceBool> mUseAutobaudInterface;
     std::unique_ptr<AnalyzerSettingInterfaceNumberList> mSerialModeInterface;

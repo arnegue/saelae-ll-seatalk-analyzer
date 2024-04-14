@@ -34,8 +34,8 @@ void SerialAnalyzer::ComputeSampleOffsets()
         mSampleOffsets.push_back( clock_generator.AdvanceByHalfPeriod() );
     }
 
-    if( mSettings->mParity != AnalyzerEnums::None )
-        mParityBitOffset = clock_generator.AdvanceByHalfPeriod();
+    // Add space for parity (mark or space)
+    mParityBitOffset = clock_generator.AdvanceByHalfPeriod();
 
     // to check for framing errors, we also want to check
     // 1/2 bit after the beginning of the stop bit
@@ -105,7 +105,7 @@ void SerialAnalyzer::WorkerThread()
         U64 frame_starting_sample = mSerial->GetSampleNumber();
 
         U64 data = 0;
-        bool parity_error = false;
+        bool is_cmd_byte = false;
         bool framing_error = false;
         bool mp_is_address = false;
 
@@ -142,44 +142,17 @@ void SerialAnalyzer::WorkerThread()
             data &= ( bit_mask >> 1 );
         }
 
-        parity_error = false;
-
-        if( mSettings->mParity != AnalyzerEnums::None )
+        mSerial->Advance( mParityBitOffset ); // Go to parity bit
+        is_cmd_byte = mSerial->GetBitState() == mBitHigh;
+        marker_location += mParityBitOffset;
+        if( is_cmd_byte )
         {
-            mSerial->Advance( mParityBitOffset );
-            bool is_even = AnalyzerHelpers::IsEven( AnalyzerHelpers::GetOnesCount( data ) );
-
-            if( mSettings->mParity == AnalyzerEnums::Even )
-            {
-                if( is_even == true )
-                {
-                    if( mSerial->GetBitState() != mBitLow ) // we expect a low bit, to keep the parity even.
-                        parity_error = true;
-                }
-                else
-                {
-                    if( mSerial->GetBitState() != mBitHigh ) // we expect a high bit, to force parity even.
-                        parity_error = true;
-                }
-            }
-            else // if( mSettings->mParity == AnalyzerEnums::Odd )
-            {
-                if( is_even == false )
-                {
-                    if( mSerial->GetBitState() != mBitLow ) // we expect a low bit, to keep the parity odd.
-                        parity_error = true;
-                }
-                else
-                {
-                    if( mSerial->GetBitState() != mBitHigh ) // we expect a high bit, to force parity odd.
-                        parity_error = true;
-                }
-            }
-
-            marker_location += mParityBitOffset;
+            mResults->AddMarker( marker_location, AnalyzerResults::ErrorSquare, mSettings->mInputChannel );
+        }
+        else
+        {
             mResults->AddMarker( marker_location, AnalyzerResults::Square, mSettings->mInputChannel );
         }
-
         // now we must determine if there is a framing error.
         framing_error = false;
 
@@ -215,8 +188,6 @@ void SerialAnalyzer::WorkerThread()
         frame.mEndingSampleInclusive = static_cast<S64>( mSerial->GetSampleNumber() );
         frame.mData1 = data;
         frame.mFlags = 0;
-        if( parity_error == true )
-            frame.mFlags |= PARITY_ERROR_FLAG | DISPLAY_AS_ERROR_FLAG;
 
         if( framing_error == true )
             frame.mFlags |= FRAMING_ERROR_FLAG | DISPLAY_AS_ERROR_FLAG;
@@ -239,11 +210,9 @@ void SerialAnalyzer::WorkerThread()
         }
         frameV2.AddByteArray( "data", bytes, bytes_per_transfer );
 
-        if( parity_error )
-        {
-            frameV2.AddString( "error", "parity" );
-        }
-        else if( framing_error )
+        frameV2.AddBoolean( "IsCommandByte", is_cmd_byte );
+
+        if( framing_error )
         {
             frameV2.AddString( "error", "framing" );
         }
@@ -328,12 +297,12 @@ U32 SerialAnalyzer::GetMinimumSampleRateHz()
 
 const char* SerialAnalyzer::GetAnalyzerName() const
 {
-    return "Async Serial";
+    return "Seatalk Serial Analyzer";
 }
 
 const char* GetAnalyzerName()
 {
-    return "Async Serial";
+    return "Seatalk Serial Analyzer";
 }
 
 Analyzer* CreateAnalyzer()

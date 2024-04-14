@@ -115,7 +115,7 @@ void SerialSimulationDataGenerator::CreateSerialByte( U64 value )
         mSerialSimulationData.TransitionIfNeeded( bit_extractor.GetNextBit() );
         mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod() );
     }
-
+    /*
     if( mSettings->mParity == AnalyzerEnums::Even )
     {
         if( AnalyzerHelpers::IsEven( AnalyzerHelpers::GetOnesCount( value ) ) == true )
@@ -133,7 +133,7 @@ void SerialSimulationDataGenerator::CreateSerialByte( U64 value )
             mSerialSimulationData.TransitionIfNeeded( mBitHigh );
 
         mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod() );
-    }
+    }*/
 
     mSerialSimulationData.TransitionIfNeeded( mBitHigh ); // we need to end high
 

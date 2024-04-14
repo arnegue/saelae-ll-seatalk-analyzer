@@ -1,6 +1,9 @@
-# Saleae Asynchronous Serial Analyzer
+# Seatalk Serial Analyzer
 
-Saleae Asynchronous Serial Analyzer
+Seatalk Serial Analyzer
+
+This is nearly the same as the original [Serial Analyzer](https://github.com/saleae/serial-analyzer) where it is forked from.
+Only the parity bit is used differently (parity mark for command byte, parity space for every other byte), so that it can be used for High-Level-Python analyzer for my [NMEA-Seatalk-Multiplexer](https://github.com/arnegue/NMEA-Seatalk-Multiplexer).
 
 ## Getting Started
 
