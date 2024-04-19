@@ -10,18 +10,7 @@ nmea_seatalk_multiplexer_venv_path = nmea_seatalk_multiplexer_path + r"\venv\Lib
 sys.path.append(nmea_seatalk_multiplexer_venv_path)
 sys.path.append(nmea_seatalk_multiplexer_path)
 
-import seatalk.datagrams.seatalk_datagram
-
-def get_all_seatalk_datagrams():
-    seatalk_datagram_map = {}
-    for name, obj in inspect.getmembers(seatalk):
-        # Abstract, non-private SeatalkDatagrams
-        if inspect.isclass(obj) and issubclass(obj, seatalk.datagrams.seatalk_datagram.SeatalkDatagram) and not inspect.isabstract(obj) and obj.__name__[0] != '_':
-            seatalk_datagram_map[obj.seatalk_id] = obj
-            print("Name", name, inspect.isclass(obj) and issubclass(obj, seatalk.datagrams.seatalk_datagram.SeatalkDatagram), obj.__class__.__name__)
-    print("Extracted", len(seatalk_datagram_map), "datagrams")
-    return seatalk_datagram_map
-
+from seatalk import seatalk
 
 class SeatalkDatagram:
     def __init__(self):
@@ -51,7 +40,8 @@ class Hla(HighLevelAnalyzer):
 
     def __init__(self):
         self.current_datagram = None
-        self.all_datagrams = get_all_seatalk_datagrams()
+        self.all_datagrams = seatalk.SeatalkDevice.get_datagram_map()
+        print("Extracted", len(self.all_datagrams), "datagrams")
 
     def decode(self, frame: AnalyzerFrame):
         if frame.data["IsCommandByte"]:
